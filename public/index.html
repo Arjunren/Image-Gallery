@@ -6,29 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AVPhotography | Modern Photography Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
     <style>
         /* Smooth modal transitions */
-        #passwordModal { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        #passwordModal.active { opacity: 1; pointer-events: auto; }
+        .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         
         /* Loading Spinner */
-        .loader {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #ffffff;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
+        .loader { border: 3px solid rgba(255, 255, 255, 0.3); border-top: 3px solid #ffffff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Toast Notification */
-        #toast {
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #toast.show { transform: translateY(0); }
+        /* Custom Swiper Styles */
+        .swiper-pagination-bullet { background: white !important; opacity: 0.7; }
+        .swiper-pagination-bullet-active { opacity: 1 !important; }
+        .swiper-button-next, .swiper-button-prev { color: white !important; transform: scale(0.6); opacity: 0; transition: opacity 0.3s; }
+        .group:hover .swiper-button-next, .group:hover .swiper-button-prev { opacity: 1; }
+
+        /* Fullscreen Image Fit */
+        .fullscreen-img { max-height: 90vh; width: auto; max-width: 100%; object-fit: contain; margin: 0 auto; }
     </style>
 </head>
 
@@ -39,19 +36,26 @@
             <a href="#" class="text-2xl md:text-3xl font-bold tracking-tighter text-gray-950">
                 AVPhotography<span class="text-indigo-600">.</span>
             </a>
-            <button id="openUploadBtn" class="bg-gray-950 hover:bg-indigo-600 text-white font-medium px-5 py-2.5 rounded-full text-sm flex items-center gap-2 transition-all duration-300 shadow-sm hover:shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Upload
-            </button>
+            
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/Arjunren" target="_blank" class="text-gray-400 hover:text-gray-900 transition-colors">
+                    <svg height="28" viewBox="0 0 16 16" width="28" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                    </svg>
+                </a>
+                
+                <button id="openUploadBtn" class="bg-gray-950 hover:bg-indigo-600 text-white font-medium px-5 py-2.5 rounded-full text-sm flex items-center gap-2 transition-all duration-300 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    Upload
+                </button>
+            </div>
         </nav>
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-12 md:py-16 flex-grow w-full">
         <div class="mb-12 border-b border-gray-200 pb-8">
             <h1 class="text-4xl font-extrabold tracking-tighter text-gray-950 md:text-5xl">Featured Works</h1>
-            <p class="mt-3 text-gray-500 max-w-2xl text-lg">A curated collection of moments captured through the lens.</p>
+            <p class="mt-3 text-gray-500 max-w-2xl text-lg">A curated collection of moments captured through the lens. Click an image to view full screen.</p>
         </div>
         
         <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
@@ -59,44 +63,30 @@
         </div>
     </main>
 
-    <footer class="border-t border-gray-200 bg-white mt-auto">
-        <div class="max-w-7xl mx-auto px-6 py-8 text-center text-sm text-gray-400">
-            &copy; 2024 AVPhotography. All rights reserved.
-        </div>
-    </footer>
-
-    <div id="passwordModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div id="passwordModal" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 transform transition-all">
             <div class="flex justify-between items-center mb-8">
                 <h2 id="modalTitle" class="text-2xl font-bold tracking-tight text-gray-950">Admin Access</h2>
                 <button id="closeModalBtn" class="text-gray-400 hover:text-gray-800 transition-colors p-2 rounded-full hover:bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
 
             <div id="passwordStep" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Passcode</label>
-                    <input type="password" id="adminPassword" placeholder="Enter admin password" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
-                </div>
+                <input type="password" id="adminPassword" placeholder="Enter admin password" class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
                 <p id="passwordError" class="text-red-500 text-sm font-medium hidden">Incorrect password. Please try again.</p>
-                <button id="submitPasswordBtn" class="w-full bg-gray-950 hover:bg-indigo-600 text-white font-semibold py-3.5 rounded-xl transition-colors duration-300 shadow-md">
-                    Verify Access
-                </button>
+                <button id="submitPasswordBtn" class="w-full bg-gray-950 hover:bg-indigo-600 text-white font-semibold py-3.5 rounded-xl transition-colors">Verify Access</button>
             </div>
 
             <form id="uploadStep" class="space-y-5 hidden">
+                <input type="text" id="photoTitle" placeholder="Photo Title" required class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Photo Title</label>
-                    <input type="text" id="photoTitle" placeholder="e.g. Sunset in Paris" required class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Image(s) - You can select multiple</label>
+                    <input type="file" id="photoFile" accept="image/jpeg, image/png, image/webp" multiple required class="w-full text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-xl file:mr-4 file:py-3.5 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Image</label>
-                    <input type="file" id="photoFile" accept="image/jpeg, image/png, image/webp" required class="w-full text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-xl file:mr-4 file:py-3.5 file:px-4 file:rounded-l-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer transition-all">
-                </div>
-                <button type="submit" id="submitUploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 transition-colors shadow-md">
+                
+                <button type="submit" id="submitUploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center gap-3 transition-colors">
                     <span>Upload to Gallery</span>
                     <div id="uploadLoader" class="loader"></div>
                 </button>
@@ -104,19 +94,48 @@
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 z-50">
+    <div id="fullscreenModal" class="modal-overlay fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md">
+        <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/60 to-transparent">
+            <div>
+                <h3 id="fsTitle" class="text-white text-xl font-bold tracking-wide"></h3>
+                <p id="fsInfo" class="text-gray-300 text-sm mt-1"></p>
+            </div>
+            <div class="flex gap-4">
+                <button id="fsDownloadBtn" class="text-white hover:text-indigo-400 flex items-center gap-2 bg-black/30 px-4 py-2 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                    Download
+                </button>
+                <button id="closeFsBtn" class="text-white hover:text-red-400 bg-black/30 p-2 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="swiper fs-swiper w-full h-full flex items-center justify-center">
+            <div class="swiper-wrapper" id="fsSwiperWrapper">
+                </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 translate-y-24 opacity-0 pointer-events-none transition-all duration-300 ease-out bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 z-[70]">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-green-400">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span id="toastMessage" class="font-medium text-sm">Action completed.</span>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
     <script type="module">
-        // 1. Firebase Imports (ONLY FIRESTORE DATABASE - NO STORAGE NEEDED!)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 2. Firebase Configuration
+        // ==========================================
+        // PASTE YOUR FIREBASE CONFIG HERE
+        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyAfAja0ei17_lcY9xxBlncLZdnR3umz6fA",
             authDomain: "avphotography-73dcc.firebaseapp.com",
@@ -129,22 +148,33 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Variables & DOM Elements
         const ADMIN_PASSWORD = "admin321";
+        let globalPhotosData = []; // Store fetched photos for fullscreen access
+        let fsSwiperInstance = null; // Fullscreen swiper instance
+
+        // DOM Elements
         const gallery = document.getElementById('gallery');
         const emptyState = document.getElementById('emptyState');
         const modal = document.getElementById('passwordModal');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
+        const fsModal = document.getElementById('fullscreenModal');
 
-        // --- Custom Toast Function ---
+        // --- Custom Toast Fix ---
         function showToast(message) {
             toastMessage.innerText = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            // Tailwind classes to show
+            toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                // Tailwind classes to hide
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+            }, 3000);
         }
 
-        // --- Render Logic ---
+        // --- Render Gallery Logic ---
         function renderGallery(photos) {
             gallery.innerHTML = '';
             if (photos.length === 0) {
@@ -154,36 +184,141 @@
             emptyState.style.display = 'none';
 
             photos.forEach(photo => {
+                // Determine if it's the new array format or old single format
+                const isMultiple = photo.images && photo.images.length > 0;
+                const imagesArray = isMultiple ? photo.images : [{ src: photo.base64Image, width: 'Unknown', height: 'Unknown', size: 'Unknown' }];
+                
+                // Build Swiper Slides
+                let slidesHTML = '';
+                imagesArray.forEach((img) => {
+                    slidesHTML += `
+                        <div class="swiper-slide w-full h-full relative cursor-pointer" onclick="openFullscreen('${photo.id}')">
+                            <img src="${img.src}" alt="${photo.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                                <span class="text-white text-xs font-medium">${img.width}x${img.height} • ${img.size}</span>
+                                <div class="flex gap-2 mt-2">
+                                    <button onclick="event.stopPropagation(); downloadImage('${img.src}', '${photo.title}')" class="bg-white/20 hover:bg-white/40 text-white px-3 py-1 rounded text-xs backdrop-blur-sm transition">Download</button>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                const swiperControls = isMultiple && imagesArray.length > 1 ? `
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                ` : '';
+
                 const item = `
-                    <div class="group overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+                    <div class="group overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
                         <div class="aspect-square overflow-hidden bg-gray-100 relative">
-                            <img src="${photo.base64Image}" alt="${photo.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
-                            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                            <div class="swiper gallery-swiper-${photo.id} w-full h-full">
+                                <div class="swiper-wrapper">
+                                    ${slidesHTML}
+                                </div>
+                                ${swiperControls}
+                            </div>
                         </div>
-                        <div class="p-5">
+                        <div class="p-4 flex justify-between items-center bg-white z-10">
                             <h3 class="text-base font-bold text-gray-900 truncate">${photo.title}</h3>
+                            ${isMultiple && imagesArray.length > 1 ? `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md font-semibold">${imagesArray.length} Photos</span>` : ''}
                         </div>
                     </div>`;
+                
                 gallery.innerHTML += item;
+            });
+
+            // Initialize Swipers after rendering
+            photos.forEach(photo => {
+                if (photo.images && photo.images.length > 1) {
+                    new Swiper(`.gallery-swiper-${photo.id}`, {
+                        pagination: { el: '.swiper-pagination', clickable: true },
+                        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                        loop: true,
+                        nested: true // Important for having swipers inside scrolling pages
+                    });
+                }
             });
         }
 
-        // --- Fetch Photos from Firebase ---
+        // --- Fetch Photos ---
         async function fetchPhotos() {
             try {
                 const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
-                const photos = [];
-                querySnapshot.forEach((doc) => photos.push(doc.data()));
-                renderGallery(photos);
+                globalPhotosData = [];
+                querySnapshot.forEach((doc) => {
+                    globalPhotosData.push({ id: doc.id, ...doc.data() });
+                });
+                renderGallery(globalPhotosData);
             } catch (error) {
                 console.error("Error fetching photos:", error);
-                emptyState.innerText = "Error loading gallery. Did you update the Firestore Rules?";
+                emptyState.innerText = "Error loading gallery. Check console.";
                 emptyState.style.display = 'block';
             }
         }
-
         fetchPhotos(); 
+
+        // --- Download Image Global Function ---
+        window.downloadImage = function(base64Url, title) {
+            const a = document.createElement('a');
+            a.href = base64Url;
+            a.download = `${title.replace(/\s+/g, '_')}_download.webp`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("Download started!");
+        }
+
+        // --- Fullscreen Logic ---
+        window.openFullscreen = function(photoId) {
+            const photo = globalPhotosData.find(p => p.id === photoId);
+            if(!photo) return;
+
+            const imagesArray = (photo.images && photo.images.length > 0) ? photo.images : [{ src: photo.base64Image, width: 'N/A', height: 'N/A', size: 'N/A' }];
+            const wrapper = document.getElementById('fsSwiperWrapper');
+            wrapper.innerHTML = '';
+
+            imagesArray.forEach((img, index) => {
+                wrapper.innerHTML += `
+                    <div class="swiper-slide w-full h-full flex items-center justify-center p-4">
+                        <img src="${img.src}" class="fullscreen-img rounded-md shadow-2xl" data-width="${img.width}" data-height="${img.height}" data-size="${img.size}">
+                    </div>`;
+            });
+
+            document.getElementById('fsTitle').innerText = photo.title;
+            
+            // Setup Fullscreen Swiper
+            if(fsSwiperInstance) fsSwiperInstance.destroy();
+            fsSwiperInstance = new Swiper('.fs-swiper', {
+                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                pagination: { el: '.swiper-pagination', type: 'fraction' },
+                on: {
+                    init: updateFsInfo,
+                    slideChange: updateFsInfo
+                }
+            });
+
+            // Update Download Button click event
+            document.getElementById('fsDownloadBtn').onclick = () => {
+                const activeIndex = fsSwiperInstance ? fsSwiperInstance.activeIndex : 0;
+                downloadImage(imagesArray[activeIndex].src, `${photo.title}_${activeIndex+1}`);
+            };
+
+            fsModal.classList.add('active');
+        };
+
+        function updateFsInfo() {
+            if(!fsSwiperInstance) return;
+            const activeSlide = fsSwiperInstance.slides[fsSwiperInstance.activeIndex];
+            const img = activeSlide.querySelector('img');
+            const w = img.getAttribute('data-width');
+            const h = img.getAttribute('data-height');
+            const s = img.getAttribute('data-size');
+            document.getElementById('fsInfo').innerText = `Resolution: ${w}x${h} | Size: ${s}`;
+        }
+
+        document.getElementById('closeFsBtn').onclick = () => fsModal.classList.remove('active');
 
         // --- Modal & Password Logic ---
         document.getElementById('openUploadBtn').onclick = () => {
@@ -191,11 +326,8 @@
             document.getElementById('passwordStep').classList.remove('hidden');
             document.getElementById('uploadStep').classList.add('hidden');
             document.getElementById('adminPassword').value = '';
-            document.getElementById('adminPassword').focus();
         };
-        
         document.getElementById('closeModalBtn').onclick = () => modal.classList.remove('active');
-        
         document.getElementById('submitPasswordBtn').onclick = () => {
             if (document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
                 document.getElementById('passwordStep').classList.add('hidden');
@@ -206,8 +338,8 @@
             }
         };
 
-        // --- Convert to WebP & Base64 Function ---
-        function convertToBase64(file) {
+        // --- Process Multiple Images, Extract Resolution & Size ---
+        function processImage(file, isMultiple) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -217,14 +349,19 @@
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         
-                        // Resize massive images to fit Firestore's 1MB limit
-                        const MAX_WIDTH = 1200;
+                        // Shrink more if multiple files selected to avoid Firestore 1MB limit
+                        const MAX_WIDTH = isMultiple ? 800 : 1200; 
                         let width = img.width;
                         let height = img.height;
                         
-                        if (width > MAX_WIDTH) {
-                            height = Math.round((height * MAX_WIDTH) / width);
-                            width = MAX_WIDTH;
+                        if (width > MAX_WIDTH || height > MAX_WIDTH) {
+                            if(width > height) {
+                                height = Math.round((height * MAX_WIDTH) / width);
+                                width = MAX_WIDTH;
+                            } else {
+                                width = Math.round((width * MAX_WIDTH) / height);
+                                height = MAX_WIDTH;
+                            }
                         }
                         
                         canvas.width = width;
@@ -232,8 +369,17 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Output as text string
-                        resolve(canvas.toDataURL('image/webp', 0.8)); 
+                        const base64String = canvas.toDataURL('image/webp', 0.8);
+                        
+                        // Calculate approximate KB size of Base64 string
+                        const kbSize = Math.round((base64String.length * 0.75) / 1024);
+                        
+                        resolve({
+                            src: base64String,
+                            width: width,
+                            height: height,
+                            size: kbSize + " KB"
+                        }); 
                     };
                 };
             });
@@ -249,40 +395,48 @@
             const loader = document.getElementById('uploadLoader');
             const submitBtn = document.getElementById('submitUploadBtn');
 
-            if (!fileInput.files[0]) return;
+            const files = Array.from(fileInput.files);
+            if (files.length === 0) return;
 
-            // UI Loading State
-            btnText.innerText = "Processing Image...";
+            btnText.innerText = "Processing Image(s)...";
             loader.style.display = "block";
             submitBtn.disabled = true;
 
             try {
-                // 1. Convert to Base64 Text
-                const base64String = await convertToBase64(fileInput.files[0]);
+                const isMultiple = files.length > 1;
+                const processedImages = [];
+                let totalDataSize = 0;
 
-                if (base64String.length > 1000000) {
-                    throw new Error("Image is too large. Please select a smaller file.");
+                // Process all selected files
+                for (let i = 0; i < files.length; i++) {
+                    btnText.innerText = `Compressing ${i+1}/${files.length}...`;
+                    const imgData = await processImage(files[i], isMultiple);
+                    processedImages.push(imgData);
+                    totalDataSize += imgData.src.length;
+                }
+
+                // Protect against Firestore 1MB string limit
+                if (totalDataSize > 950000) {
+                    throw new Error("Total file size is too large for database storage. Please select fewer images at once.");
                 }
 
                 btnText.innerText = "Saving to Database...";
 
-                // 2. Save directly to Database (Bypassing Storage completely)
+                // Save as an Array of images
                 await addDoc(collection(db, "photos"), {
                     title: titleInput.value,
-                    base64Image: base64String,
+                    images: processedImages, // Array of {src, width, height, size}
                     createdAt: serverTimestamp()
                 });
 
-                // 3. Success Flow
-                showToast("Photo uploaded successfully!");
+                showToast("Photo(s) uploaded successfully!");
                 modal.classList.remove('active');
                 fetchPhotos(); 
 
             } catch (error) {
                 console.error("Upload error:", error);
-                alert("Upload failed. Ensure you changed the Firestore Database rules to allow read/write.");
+                alert(error.message || "Upload failed. Ensure Firestore rules are set to 'allow read, write: if true;'");
             } finally {
-                // Reset UI
                 btnText.innerText = "Upload to Gallery";
                 loader.style.display = "none";
                 submitBtn.disabled = false;
