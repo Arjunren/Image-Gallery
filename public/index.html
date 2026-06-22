@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AV - Photography | Modern Photography Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #passwordModal { display: none; }
+        #passwordModal.active { display: flex; }
+        /* Simple spinner for loading state */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+
+    <header class="bg-white sticky top-0 z-40 border-b border-gray-100 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="#" class="text-3xl font-bold tracking-tighter text-gray-950">AV - Photography<span class="text-indigo-600">.</span></a>
+            <button id="openUploadBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2.5 rounded-full text-sm flex items-center gap-2 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 3 3m-3-3v12" />
+                </svg>
+                Upload Photo
+            </button>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-12 md:py-16">
+        <div class="mb-12 border-b border-gray-100 pb-8">
+            <h1 class="text-5xl font-extrabold tracking-tighter text-gray-950 md:text-6xl">Featured Works</h1>
+            <p class="text-xl text-gray-600 mt-4 max-w-2xl">A curated selection of moments captured through the lens, exploring light, emotion, and perspective.</p>
+        </div>
+        <div id="gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            </div>
+    </main>
+
+    <div id="passwordModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/60 items-center justify-center p-6 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold tracking-tight text-gray-950">Admin Access</h2>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="passwordStep" class="space-y-4">
+                <p class="text-gray-600 mb-4">Enter administrator password to upload.</p>
+                <input type="password" id="adminPassword" placeholder="Enter password" class="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400">
+                <p id="passwordError" class="text-red-600 text-sm hidden">Incorrect password.</p>
+                <button id="submitPasswordBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 rounded-xl transition">Verify</button>
+            </div>
+
+            <form id="uploadStep" class="space-y-4 hidden">
+                <p class="text-gray-600 mb-4">Select an image to convert to WebP and upload.</p>
+                <input type="text" id="photoTitle" placeholder="Photo Title" required class="w-full px-5 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400">
+                <input type="file" id="photoFile" accept="image/jpeg, image/png, image/webp" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-gray-200 rounded-xl p-2">
+                <button type="submit" id="submitUploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 rounded-xl flex justify-center items-center gap-2">
+                    <span>Upload Image</span>
+                    <div id="uploadLoader" class="loader"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "admin321";
+        let currentPhotos = [];
+        
+        // DOM Elements
+        const gallery = document.getElementById('gallery');
+        const modal = document.getElementById('passwordModal');
+        const passStep = document.getElementById('passwordStep');
+        const uploadStep = document.getElementById('uploadStep');
+        const passInput = document.getElementById('adminPassword');
+        const passError = document.getElementById('passwordError');
+        const uploadForm = document.getElementById('uploadStep');
+        const uploadBtnText = document.querySelector('#submitUploadBtn span');
+        const uploadLoader = document.getElementById('uploadLoader');
+
+        // 1. Fetch & Render Gallery
+        async function fetchPhotos() {
+            try {
+                const response = await fetch('/api/photos');
+                currentPhotos = await response.json();
+                renderGallery(currentPhotos);
+            } catch (err) {
+                console.error("Error fetching photos", err);
+            }
+        }
+
+        function renderGallery(photos) {
+            gallery.innerHTML = '';
+            photos.forEach(photo => {
+                const item = `
+                    <div class="group overflow-hidden rounded-3xl bg-white shadow-md hover:shadow-xl transition-shadow duration-300">
+                        <div class="aspect-square overflow-hidden bg-gray-100">
+                            <img src="${photo.url}" alt="${photo.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-semibold tracking-tight text-gray-950 truncate">${photo.title}</h3>
+                        </div>
+                    </div>
+                `;
+                gallery.innerHTML += item;
+            });
+        }
+
+        // Initialize gallery on load
+        fetchPhotos();
+
+        // 2. Modal Logic
+        document.getElementById('openUploadBtn').addEventListener('click', () => {
+            modal.classList.add('active');
+            resetModal();
+            passInput.focus();
+        });
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.remove('active'));
+
+        function resetModal() {
+            passStep.classList.remove('hidden');
+            uploadStep.classList.add('hidden');
+            passInput.value = '';
+            passError.classList.add('hidden');
+            document.getElementById('photoTitle').value = '';
+            document.getElementById('photoFile').value = '';
+            document.getElementById('modalTitle').innerText = "Admin Access";
+        }
+
+        // 3. Password Verification
+        document.getElementById('submitPasswordBtn').addEventListener('click', verifyPassword);
+        passInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyPassword(); });
+
+        function verifyPassword() {
+            if (passInput.value === ADMIN_PASSWORD) {
+                passStep.classList.add('hidden');
+                uploadStep.classList.remove('hidden');
+                document.getElementById('modalTitle').innerText = "Upload New Photo";
+            } else {
+                passError.classList.remove('hidden');
+            }
+        }
+
+        // 4. Handle Actual Upload
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('photoFile');
+            const titleInput = document.getElementById('photoTitle');
+            
+            if (!fileInput.files[0]) return;
+
+            // Prepare UI for loading
+            uploadBtnText.innerText = "Processing WebP...";
+            uploadLoader.style.display = "block";
+            document.getElementById('submitUploadBtn').disabled = true;
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            formData.append('title', titleInput.value);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentPhotos.unshift(data.photo);
+                    renderGallery(currentPhotos);
+                    modal.classList.remove('active');
+                } else {
+                    alert(data.error || 'Upload failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred during upload.');
+            } finally {
+                // Reset UI
+                uploadBtnText.innerText = "Upload Image";
+                uploadLoader.style.display = "none";
+                document.getElementById('submitUploadBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
